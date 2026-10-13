@@ -61,7 +61,7 @@ Or drag the `.zip` to https://trace.playwright.dev.
 
 ### Reporting
 - **UI** — Playwright trace viewer (step-by-step DOM snapshots, screenshots, network)
-- **API** — `ITestOutputHelper` output visible in the HTML report per test
+- **API** — `ITestOutputHelper` output visible in terminal (`--logger "console;verbosity=detailed"`), GitHub Actions run log, and VS Test Explorer — NOT in the VSTest HTML report
 - **Allure.Xunit is incompatible with xUnit v3** — it pulls in `xunit.core` v2 which causes a `FactAttribute` type conflict; do not add it until the Allure team ships a v3 adapter
 
 ### runsettings split

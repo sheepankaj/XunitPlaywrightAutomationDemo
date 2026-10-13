@@ -54,7 +54,11 @@ pwsh XunitPlaywrightAutomationDemo/bin/Debug/net10.0/playwright.ps1 show-trace `
 
 Or drag any `.zip` from `TestResults/Traces/` to [trace.playwright.dev](https://trace.playwright.dev).
 
-**API test output** — visible in the HTML report by clicking on an API test name.
+**API test output** — the VSTest HTML report only shows pass/fail. To see the step-by-step request/response logs written via `ITestOutputHelper`, use one of:
+
+- **Terminal** — run with `--logger "console;verbosity=detailed"` to see output inline
+- **GitHub Actions** — the workflow already passes `--logger "console;verbosity=detailed"`, so output appears in the Run Tests step log
+- **Visual Studio Test Explorer** — click a test → View Output in the output pane
 
 ## Project structure
 
@@ -129,7 +133,7 @@ This is not a configuration issue — it cannot be worked around without the All
 ### What to use instead (today)
 
 - **UI tests** → Playwright Trace Viewer — gives the same step-by-step experience as the TypeScript Playwright HTML reporter (DOM snapshots, screenshots, network requests, timeline). See [Viewing results](#viewing-results) above.
-- **API tests** → `ITestOutputHelper` — logs steps and request/response detail visible in the HTML report per test.
+- **API tests** → `ITestOutputHelper` — logs steps and request/response detail; visible in the terminal, GitHub Actions run log, and Visual Studio Test Explorer (not in the VSTest HTML report).
 
 ### When Allure v3 support lands
 
