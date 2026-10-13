@@ -82,6 +82,66 @@ XunitPlaywrightAutomationDemo/
     playwright-tests.yml        # GitHub Actions pipeline
 ```
 
+## NuGet package dependency guide
+
+### Critical: use `xunit.v3`, NOT `xunit`
+
+If you add packages through the NuGet Package Manager UI or `dotnet add package`, the default search result for "xunit" returns `xunit` (v2). **Do not install that package.** It causes this build error:
+
+```
+error CS0433: The type 'FactAttribute' exists in both
+  'xunit.core, Version=2.x.x' and 'xunit.v3.core, Version=1.x.x'
+```
+
+This happens because `Microsoft.Playwright.Xunit.v3` already pulls in `xunit.v3.core` internally. Adding `xunit` (v2) on top of it creates a type conflict that breaks the build.
+
+**Always use `xunit.v3` (the v3 package) for this project.**
+
+### Package versions (managed centrally in `Directory.Packages.props`)
+
+| Package | Version | Notes |
+|---|---|---|
+| `xunit.v3` | 1.0.1 | xUnit v3 core — **not** `xunit` (v2) |
+| `Microsoft.Playwright.Xunit.v3` | 1.63.0 | Playwright xUnit v3 adapter |
+| `xunit.runner.visualstudio` | 3.1.4 | Must be v3.x to match xUnit v3 |
+| `Microsoft.NET.Test.Sdk` | 17.14.1 | VSTest host |
+| `coverlet.collector` | 6.0.4 | Code coverage |
+
+All package versions are defined once in `Directory.Packages.props` at the solution root. Do not add `Version="..."` attributes in the `.csproj` — Central Package Management will reject it.
+
+---
+
+## Allure Reports — current status with xUnit v3
+
+### Why Allure does not work right now
+
+[Allure](https://allurereport.org) is free and open-source (Apache 2.0). The NuGet package `Allure.Xunit` works well with xUnit v2 projects, but **it is not compatible with xUnit v3** as of this writing.
+
+The root cause is the same type-conflict pattern: `Allure.Xunit` (all published versions, including pre-releases) has a hard dependency on `xunit.core` v2, which conflicts with `xunit.v3.core`:
+
+```
+error CS0433: The type 'FactAttribute' exists in both
+  'xunit.core, Version=2.4.1' and 'xunit.v3.core, Version=1.0.1'
+```
+
+This is not a configuration issue — it cannot be worked around without the Allure team shipping a proper xUnit v3 adapter.
+
+### What to use instead (today)
+
+- **UI tests** → Playwright Trace Viewer — gives the same step-by-step experience as the TypeScript Playwright HTML reporter (DOM snapshots, screenshots, network requests, timeline). See [Viewing results](#viewing-results) above.
+- **API tests** → `ITestOutputHelper` — logs steps and request/response detail visible in the HTML report per test.
+
+### When Allure v3 support lands
+
+Track progress on the [Allure.Net GitHub repository](https://github.com/allure-framework/allure-csharp). Once a version ships that does not depend on `xunit.core` v2, adding it will be a two-step change:
+
+1. Add the new package to `Directory.Packages.props` and `.csproj`
+2. Add `[AllureSuite]` / `[AllureFeature]` / `[AllureStory]` attributes to test classes and `AllureApi.Step()` calls inside page object methods
+
+No changes to `BaseUITest`, `BaseApiTest`, or the test structure will be required.
+
+---
+
 ## Adding tests
 
 **New UI test:**
