@@ -1,0 +1,8 @@
+# Normalise line endings to LF in the repo; let Git convert on checkout per OS
+* text=auto eol=lf
+
+# Force binary files to never be converted
+*.zip binary
+*.png binary
+*.jpg binary
+*.dll binary
